@@ -60,7 +60,7 @@
     <p>The test set has three unseen scenes: 450 map images and 3,150 queries. Every query position is rendered under
     seven Sun conditions, from the map’s own Sun (C0) to the Sun behind the camera and only 8° above the horizon
     (C6). Training uses five other scenes lit from many Sun directions.</p>
-    <p><a href="/">See one place under all seven Suns</a> · <a href="/sunlab/">Move the Sun yourself</a></p>
+    <p><a href="/">See one location under all seven Sun positions</a> · <a href="/sunlab/">Move the Sun yourself</a></p>
   </div>
   <figure class="figure-box">
     <img src="/figures/apollo_vs_sim.webp" alt="Apollo 11 surface photographs above LunarSim renders" loading="lazy">
@@ -145,13 +145,13 @@
   </div>
 
   <div class="grid-3" style="margin-top:28px">
-    <div class="card"><h3>Lighting in training matters most</h3><p>Training on the same scenes but with a single Sun
+    <div class="card"><h3>Varied lighting in training has the largest effect</h3><p>Training on the same scenes but with a single Sun
       direction costs 13.6 points with a frozen backbone and 21.5 points with a fine-tuned one. A more flexible model
       fits the training light more closely, so fine-tuning only helps together with varied lighting.</p></div>
-    <div class="card"><h3>λ barely matters</h3><p>With a frozen backbone, every λ from 0 to 1 gives the same accuracy
+    <div class="card"><h3>The choice of λ has little effect</h3><p>With a frozen backbone, every λ from 0 to 1 gives the same accuracy
       within 1.5 points, as the theory predicts. With fine-tuning the spread stays small, and a learned λ simply stays
       at its starting value. NetVLAD’s residual pooling, a different design choice, pulls ahead by 4.5 points.</p></div>
-    <div class="card"><h3>Fusion beats the matcher</h3><p>Ranking by local matches alone rescues 15% of queries but
+    <div class="card"><h3>How evidence is fused matters more than the matcher</h3><p>Ranking by local matches alone rescues 15% of queries but
       breaks 16% that were right. Fused with the global score, it keeps half the rescues and breaks only 2.4%. With
       fusion, a training-free matcher, simple nearest neighbours and the learned LightGlue perform alike.</p></div>
   </div>
@@ -164,7 +164,7 @@
     or from elevation-model pipelines, matters more than any architecture choice.</li>
     <li><strong>Adapt the backbone, then choose the pooling.</strong> Fine-tuning adds 11–19 points for every model.
     Fix λ rather than learning it; λ&nbsp;=&nbsp;0 is the cheapest.</li>
-    <li><strong>Fuse, don’t replace.</strong> Local evidence on the Moon is plentiful but unreliable. Let it adjust the
+    <li><strong>Use local evidence to adjust the global ranking, not to replace it.</strong> Local evidence on the Moon is plentiful but unreliable. Let it adjust the
     global ranking only where that ranking is uncertain; then the cheapest matcher is good enough.</li>
   </ol>
   <p class="callout" style="max-width:820px">All results come from simulation. The comparisons are paired and made on
@@ -199,7 +199,7 @@
 </main>
 
 <footer class="site-footer"><div class="wrap">
-  <div>LunarSim / Galatea · University of Houston</div>
+  <div>LunarSim · Raunak Sarbajna and Christoph F. Eick, Department of Computer Science, University of Houston</div>
   <div><a href="/play/">Play</a> · <a href="/sunlab/">Sun Lab</a> · <a href="https://github.com/RaunakDune/galatea-lunar-vpr">Code</a></div>
 </div></footer>
 </body>
