@@ -1,0 +1,206 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Research — Galatea: optimal transport for lunar place recognition</title>
+<meta name="description" content="Galatea: an optimal transport framework for merging global and local descriptors in visual place recognition on extraterrestrial surfaces. Method, benchmark and results.">
+<link rel="icon" href="/assets/favicon.svg" type="image/svg+xml">
+<link rel="stylesheet" href="/assets/style.css">
+</head>
+<body>
+<header class="site-header"><div class="wrap">
+  <a class="brand" href="/"><span class="brand-dot"></span>LunarSim</a>
+  <nav class="nav">
+    <a href="/">Home</a>
+    <a href="/play/">Where on the Moon?</a>
+    <a href="/sunlab/">Sun Lab</a>
+    <a href="/research/" aria-current="page">Research</a>
+    <a href="https://github.com/RaunakDune/galatea-lunar-vpr">Code</a>
+  </nav>
+</div></header>
+
+<main>
+<section class="hero"><div class="wrap">
+  <div class="eyebrow">Research</div>
+  <h1>Galatea: an optimal transport framework for merging global and local descriptors in visual place recognition on extraterrestrial surfaces</h1>
+  <p class="muted">Raunak Sarbajna and Christoph F. Eick · Department of Computer Science, University of Houston · manuscript in preparation</p>
+  <div class="btn-row">
+    <a class="btn btn-primary" href="https://github.com/RaunakDune/galatea-lunar-vpr/blob/main/paper/main.pdf">Paper (PDF)</a>
+    <a class="btn" href="https://github.com/RaunakDune/galatea-lunar-vpr">Code, benchmark and results</a>
+    <a class="btn" href="#cite">Cite</a>
+  </div>
+</div></section>
+
+<section><div class="wrap">
+  <h2>In short</h2>
+  <p class="lead">A rover on the Moon has no GPS. It can still locate itself by recognising places: it compares its
+  camera view against a set of reference images with known positions, much as you might recognise a street corner.
+  This is called <em>visual place recognition</em>. It is hard on the Moon for three reasons: the Sun casts black,
+  sharp shadows that move over the lunar day; crater fields look statistically alike everywhere; and lunar soil
+  reflects light in unusual ways.</p>
+  <div class="grid-3" style="margin-top:12px">
+    <div class="card"><h3>A benchmark</h3><p>LunarSim-VPR renders the same rover positions under seven Sun directions, so
+      changes in accuracy are caused by lighting alone.</p></div>
+    <div class="card"><h3>A framework</h3><p>Galatea treats both stages of place recognition as optimal transport: pooling
+      image features into one descriptor, and checking local feature matches.</p></div>
+    <div class="card"><h3>A controlled study</h3><p>Three seeds per model and paired confidence intervals show which
+      design choices matter for lunar navigation, and which do not.</p></div>
+  </div>
+</div></section>
+
+<section id="benchmark"><div class="wrap grid-2">
+  <div>
+    <h2>The LunarSim-VPR benchmark</h2>
+    <p>No public lunar dataset combines exact camera positions with systematic changes of lighting, so we built a
+    lightweight renderer. Each scene combines a 16.4&nbsp;km regional elevation model with a detailed 0.3&nbsp;m local
+    one. Craters follow the size–frequency statistics of real lunar terrain, and distant massifs form the horizon.
+    Light follows the lunar-Lambert reflectance model with an opposition surge, and shadows are cast by both local
+    and regional relief.</p>
+    <p>The test set has three unseen scenes: 450 map images and 3,150 queries. Every query position is rendered under
+    seven Sun conditions, from the map’s own Sun (C0) to the Sun behind the camera and only 8° above the horizon
+    (C6). Training uses five other scenes lit from many Sun directions.</p>
+    <p><a href="/">See one place under all seven Suns</a> · <a href="/sunlab/">Move the Sun yourself</a></p>
+  </div>
+  <figure class="figure-box">
+    <img src="/figures/apollo_vs_sim.webp" alt="Apollo 11 surface photographs above LunarSim renders" loading="lazy">
+    <figcaption>Top: Apollo 11 surface photographs (NASA, public domain). Bottom: LunarSim renders. The renderer
+    reproduces the black sky, horizon structure and low-Sun shading, but not rocks smaller than its 0.3&nbsp;m grid.</figcaption>
+  </figure>
+</div></section>
+
+<section id="method"><div class="wrap">
+  <h2>The method</h2>
+  <p>Galatea is a two-stage system. Both stages are optimal transport problems: they decide how much “mass” to move
+  between two sets of things.</p>
+  <div class="pipeline" style="margin:18px 0 24px">
+    <div class="box"><b>Image</b>Rover camera view</div><div class="arrow">→</div>
+    <div class="box"><b>Foundation model</b>DINOv2 splits the image into 300 patch features</div><div class="arrow">→</div>
+    <div class="box"><b>Stage 1: OT pooling</b>Features are assigned to 64 clusters or a “dust-bin”; one descriptor per image</div>
+  </div>
+  <div class="pipeline" style="margin-bottom:24px">
+    <div class="box"><b>Retrieve</b>Top 10 most similar map images</div><div class="arrow">→</div>
+    <div class="box"><b>Stage 2: OT matching</b>Keypoints matched by appearance and by layout (partial fused Gromov–Wasserstein)</div><div class="arrow">→</div>
+    <div class="box"><b>Fuse</b>Global similarity + saturating local score → final ranking</div>
+  </div>
+  <div class="grid-2">
+    <div>
+      <h3>A family of pooling rules</h3>
+      <p>The first stage solves a <em>semi-relaxed unbalanced</em> transport problem with one parameter, λ. At λ&nbsp;=&nbsp;0
+      it is exactly the assignment of NetVLAD, at λ&nbsp;=&nbsp;1 exactly that of SALAD, and Galatea can also learn λ. The
+      dust-bin lets the model throw away features that say nothing about the place, such as black sky.</p>
+      <p>We prove that the iterations converge at rate λ, that the dust-bin acts as a logistic gate, and that after
+      normalisation the descriptor depends on the transport plan only through a weight per feature. That last result
+      predicts that, with a frozen backbone, the choice of λ should barely matter.</p>
+    </div>
+    <div>
+      <h3>Fusing local and global evidence</h3>
+      <p>The second stage matches keypoints between the query and each candidate, rewarding matches that keep their
+      relative layout. It needs no training and is unaffected by rotating, shifting or scaling either image.</p>
+      <p>Its score is fused with the global similarity through a saturating rule. We prove this rule can only overturn
+      the global ranking when the global margin is small, which protects confident global decisions from local
+      matches on moving shadow edges.</p>
+    </div>
+  </div>
+</div></section>
+
+<section id="results"><div class="wrap">
+  <h2>Results</h2>
+  <p>Recall@1 is the share of query images whose top-ranked map image shows the correct place (within 10&nbsp;m and
+  60° heading). “Hard” averages the three hardest Sun conditions (C2, C5, C6). Lunar-trained rows: mean ± standard
+  deviation over three seeds.</p>
+  <div class="grid-2" style="align-items:start">
+    <div class="table-wrap">
+      <table>
+        <thead><tr><th>Model</th><th>Recall@1</th><th>Recall@5</th><th>Hard</th></tr></thead>
+        <tbody>
+          <tr class="group"><td colspan="4">Earth-trained, used as is</td></tr>
+          <tr><td>CosPlace-R50</td><td>26.8</td><td>50.3</td><td>14.1</td></tr>
+          <tr><td>EigenPlaces-R50</td><td>28.1</td><td>53.0</td><td>16.6</td></tr>
+          <tr><td>DINOv2-SALAD</td><td>35.8</td><td>65.4</td><td>23.4</td></tr>
+          <tr class="group"><td colspan="4">Lunar-trained head, frozen backbone</td></tr>
+          <tr><td>GeM pooling</td><td>31.5 ± 0.4</td><td>64.7</td><td>21.7</td></tr>
+          <tr><td>NetVLAD</td><td>58.2 ± 0.7</td><td>86.6</td><td>46.7</td></tr>
+          <tr><td>OT, λ = 0</td><td>59.9 ± 0.8</td><td>87.6</td><td>48.4</td></tr>
+          <tr><td>OT, λ = 1 (SALAD)</td><td>59.4 ± 0.7</td><td>87.3</td><td>48.6</td></tr>
+          <tr><td>OT, learned λ (Galatea)</td><td>59.8 ± 0.8</td><td>87.3</td><td>47.6</td></tr>
+          <tr class="group"><td colspan="4">Lunar-trained, backbone fine-tuned</td></tr>
+          <tr><td>GeM pooling</td><td>50.7 ± 3.2</td><td>81.4</td><td>42.0</td></tr>
+          <tr><td>NetVLAD</td><td>76.4 ± 0.7</td><td>94.3</td><td>64.3</td></tr>
+          <tr><td>OT, λ = 0</td><td>73.1 ± 1.1</td><td>93.3</td><td>61.9</td></tr>
+          <tr><td>OT, λ = 1 (SALAD)</td><td>73.5 ± 0.5</td><td>94.0</td><td>62.2</td></tr>
+          <tr><td>OT, learned λ (Galatea)</td><td>71.3 ± 1.2</td><td>93.0</td><td>60.1</td></tr>
+          <tr class="group"><td colspan="4">With global–local fusion (partial FGW)</td></tr>
+          <tr><td>Galatea head, frozen</td><td>66.1 ± 0.1</td><td>–</td><td>–</td></tr>
+          <tr><td>Galatea head, fine-tuned</td><td>74.5 ± 0.8</td><td>–</td><td>63.0</td></tr>
+          <tr><td>NetVLAD, fine-tuned (full system)</td><td class="best">78.8 ± 0.5</td><td class="best">95.3</td><td class="best">66.9</td></tr>
+        </tbody>
+      </table>
+    </div>
+    <figure class="figure-box">
+      <img src="/figures/percond.webp" alt="Recall@1 for each of the seven Sun conditions, for several models" loading="lazy">
+      <figcaption>Recall@1 for each Sun condition. Earth-trained models (dashed) collapse once the Sun moves.
+      Lunar training, fusion and fine-tuning (dotted) each recover part of the loss.</figcaption>
+    </figure>
+  </div>
+
+  <div class="grid-3" style="margin-top:28px">
+    <div class="card"><h3>Lighting in training matters most</h3><p>Training on the same scenes but with a single Sun
+      direction costs 13.6 points with a frozen backbone and 21.5 points with a fine-tuned one. A more flexible model
+      fits the training light more closely, so fine-tuning only helps together with varied lighting.</p></div>
+    <div class="card"><h3>λ barely matters</h3><p>With a frozen backbone, every λ from 0 to 1 gives the same accuracy
+      within 1.5 points, as the theory predicts. With fine-tuning the spread stays small, and a learned λ simply stays
+      at its starting value. NetVLAD’s residual pooling, a different design choice, pulls ahead by 4.5 points.</p></div>
+    <div class="card"><h3>Fusion beats the matcher</h3><p>Ranking by local matches alone rescues 15% of queries but
+      breaks 16% that were right. Fused with the global score, it keeps half the rescues and breaks only 2.4%. With
+      fusion, a training-free matcher, simple nearest neighbours and the learned LightGlue perform alike.</p></div>
+  </div>
+</div></section>
+
+<section id="takeaways"><div class="wrap">
+  <h2>What this means for lunar navigation</h2>
+  <ol style="max-width:820px">
+    <li><strong>Train under many Sun directions.</strong> An illumination sweep in the training data, from a renderer
+    or from elevation-model pipelines, matters more than any architecture choice.</li>
+    <li><strong>Adapt the backbone, then choose the pooling.</strong> Fine-tuning adds 11–19 points for every model.
+    Fix λ rather than learning it; λ&nbsp;=&nbsp;0 is the cheapest.</li>
+    <li><strong>Fuse, don’t replace.</strong> Local evidence on the Moon is plentiful but unreliable. Let it adjust the
+    global ranking only where that ranking is uncertain; then the cheapest matcher is good enough.</li>
+  </ol>
+  <p class="callout" style="max-width:820px">All results come from simulation. The comparisons are paired and made on
+  unseen scenes, so we expect them to carry over better than the absolute numbers, but they still need to be
+  confirmed on real lunar imagery.</p>
+</div></section>
+
+<section id="related"><div class="wrap">
+  <h2>Related: DESPINA</h2>
+  <p style="max-width:820px"><a href="https://doi.org/10.5194/isprs-annals-XI-2-2026-881-2026">DESPINA</a>
+  (Nelson-Archer, Sarbajna and Eick, ISPRS Annals 2026) synthesises photorealistic lunar horizon views for a given
+  location from orbital elevation models with diffusion models. LunarSim gives exact control of the Sun; DESPINA
+  gives realistic appearance for real sites. A real-imagery evaluation of Galatea at the Apollo 17 landing site is
+  planned.</p>
+</div></section>
+
+<section id="cite"><div class="wrap">
+  <h2>Cite</h2>
+<pre class="cite">@misc{sarbajna2026galatea,
+  title  = {Galatea: An Optimal Transport Framework for Merging Global and Local Descriptors
+            in Visual Place Recognition on Extraterrestrial Surfaces},
+  author = {Sarbajna, Raunak and Eick, Christoph F.},
+  year   = {2026},
+  note   = {Manuscript in preparation. Code: https://github.com/RaunakDune/galatea-lunar-vpr}
+}</pre>
+  <p><strong>Authors.</strong> Raunak Sarbajna
+  (<a href="https://orcid.org/0000-0002-3184-7226">ORCID</a> ·
+  <a href="https://scholar.google.com/citations?user=Ypn_raEAAAAJ&amp;hl=en">Google Scholar</a>) and Christoph F. Eick,
+  Department of Computer Science, University of Houston.</p>
+  <p class="muted">Code, renderer and rendered benchmark are released under the MIT license. Apollo photographs: NASA, public domain.</p>
+</div></section>
+</main>
+
+<footer class="site-footer"><div class="wrap">
+  <div>LunarSim / Galatea · University of Houston</div>
+  <div><a href="/play/">Play</a> · <a href="/sunlab/">Sun Lab</a> · <a href="https://github.com/RaunakDune/galatea-lunar-vpr">Code</a></div>
+</div></footer>
+</body>
+</html>

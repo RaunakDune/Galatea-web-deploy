@@ -1,0 +1,100 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>LunarSim — Visual place recognition on the Moon</title>
+<meta name="description" content="LunarSim and Galatea: research on how rovers can recognise places on the Moon under changing sunlight. Play Where on the Moon? and explore the results.">
+<meta property="og:title" content="LunarSim — Visual place recognition on the Moon">
+<meta property="og:description" content="Can you tell where a rover is on the Moon when the Sun has moved? Play Where on the Moon? and explore the Galatea research.">
+<meta property="og:image" content="https://lunarsim.org/figures/og.png">
+<link rel="icon" href="/assets/favicon.svg" type="image/svg+xml">
+<link rel="stylesheet" href="/assets/style.css">
+</head>
+<body>
+<header class="site-header"><div class="wrap">
+  <a class="brand" href="/"><span class="brand-dot"></span>LunarSim</a>
+  <nav class="nav">
+    <a href="/" aria-current="page">Home</a>
+    <a href="/play/">Where on the Moon?</a>
+    <a href="/sunlab/">Sun Lab</a>
+    <a href="/research/">Research</a>
+    <a href="https://github.com/RaunakDune/galatea-lunar-vpr">Code</a>
+  </nav>
+</div></header>
+
+<main>
+<section class="hero"><div class="wrap">
+  <div class="eyebrow">Galatea · University of Houston</div>
+  <h1>How does a rover know where it is on the Moon?</h1>
+  <p class="lead">There is no GPS on the Moon. One way for a rover to find itself is to recognise a place it
+  has seen before. That is hard on the lunar surface, because every crater field looks alike and the shadows
+  move with the Sun. LunarSim is our open benchmark for this problem, and Galatea is our method for solving it.</p>
+  <div class="btn-row">
+    <a class="btn btn-primary" href="/play/">Play “Where on the Moon?”</a>
+    <a class="btn" href="/research/">Read about the research</a>
+  </div>
+</div></section>
+
+<section><div class="wrap">
+  <h2>One place, seven Suns</h2>
+  <p class="lead">These eight images show the <em>same</em> spot. The first is the reference “map” image. The other
+  seven were taken from almost the same position, but with the Sun somewhere else. On the Moon there is no air to
+  soften shadows, so moving the Sun changes almost everything the camera sees.</p>
+  <div class="suns" id="suns"></div>
+  <p class="muted" style="margin-top:10px">Sun position given as azimuth / elevation in degrees. Rendered with LunarSim.</p>
+</div></section>
+
+<section><div class="wrap grid-2">
+  <div>
+    <h2>Play: can you beat the rover?</h2>
+    <p>In <strong>Where on the Moon?</strong> you see what a rover’s camera sees and pick the matching place from
+    six map images. The levels get harder as the Sun moves further from where it was when the map was made.
+    After each round you see what our AI chose.</p>
+    <p>The rover AI picks the right place in 81–96% of these rounds, depending on the lighting. A strong AI
+    trained on Earth photos manages only 52–84%. How do people compare? That is an open question, and one we hope
+    the game can help answer.</p>
+    <a class="btn btn-primary" href="/play/">Start a mission</a>
+  </div>
+  <div>
+    <h2>Explore: the Sun Lab</h2>
+    <p>Drag the Sun around a lunar scene and watch the shadows move. For every Sun position, the Sun Lab shows
+    whether our model still recognises the place among 150 map images.</p>
+    <a class="btn" href="/sunlab/">Open the Sun Lab</a>
+  </div>
+</div></section>
+
+<section><div class="wrap">
+  <h2>What we found</h2>
+  <div class="grid-3" style="margin-top:18px">
+    <div class="card"><div class="stat">35.8% → 78.8%</div><div class="stat-label">Share of rover views placed correctly on the first guess: best
+      Earth-trained model vs. our full system (3,150 test views).</div></div>
+    <div class="card"><div class="stat">−21.5 points</div><div class="stat-label">What a model loses if it only ever sees one Sun
+      direction during training. Varied lighting in training matters more than any architecture choice.</div></div>
+    <div class="card"><div class="stat">16% → 2.4%</div><div class="stat-label">Share of views that were right and became wrong after
+      re-ranking: local matches used alone vs. fused with the global score. How evidence is combined matters more than the matcher.</div></div>
+  </div>
+  <p style="margin-top:22px"><a href="/research/">See the method and all results →</a></p>
+</div></section>
+</main>
+
+<footer class="site-footer"><div class="wrap">
+  <div>LunarSim / Galatea · Raunak Sarbajna and Christoph F. Eick · Department of Computer Science, University of Houston</div>
+  <div><a href="https://github.com/RaunakDune/galatea-lunar-vpr">Code and data (MIT)</a> · <a href="/research/#cite">Cite</a></div>
+</div></footer>
+<script>
+(function () {
+  var p = '0012', base = '/data/img/t1001/';
+  var items = [['db_' + p, 'Map · 135 / 30', true], ['q_C0_same_' + p, '135 / 30'], ['q_C1_el15_' + p, '135 / 15'],
+    ['q_C2_el6_' + p, '135 / 6'], ['q_C3_el60_' + p, '135 / 60'], ['q_C4_az90_' + p, '225 / 30'],
+    ['q_C5_az180_' + p, '315 / 30'], ['q_C6_az180_el8_' + p, '315 / 8']];
+  var box = document.getElementById('suns');
+  items.forEach(function (it) {
+    var f = document.createElement('figure'); if (it[2]) f.className = 'ref';
+    f.innerHTML = '<img loading="lazy" alt="Lunar surface, Sun ' + it[1] + '" src="' + base + it[0] + '.webp"><figcaption>' + it[1] + '</figcaption>';
+    box.appendChild(f);
+  });
+})();
+</script>
+</body>
+</html>

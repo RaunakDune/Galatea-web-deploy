@@ -1,0 +1,5 @@
+{
+  "collect": false,
+  "endpoint": "/api/log",
+  "consent_text": "If you tick this box, each answer you give (which images you saw, your choice and your response time) is stored with a random ID that changes on every visit. We do not collect names, emails, IP addresses or cookies. The anonymous data are used for research on how people and AI recognise places on the Moon and may be published openly. Unticking the box stops sharing."
+}

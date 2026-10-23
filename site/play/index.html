@@ -1,0 +1,107 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Where on the Moon? — LunarSim</title>
+<meta name="description" content="See what a lunar rover sees, then find the matching place on the map before the timer runs out. Can you beat the rover's AI when the Sun has moved?">
+<meta property="og:title" content="Where on the Moon?">
+<meta property="og:description" content="Find the rover on the Moon when the shadows have moved. Can you beat the AI?">
+<meta property="og:image" content="https://lunarsim.org/figures/og.png">
+<link rel="icon" href="/assets/favicon.svg" type="image/svg+xml">
+<link rel="stylesheet" href="/assets/style.css">
+<link rel="stylesheet" href="/assets/game.css">
+</head>
+<body>
+<header class="site-header"><div class="wrap">
+  <a class="brand" href="/"><span class="brand-dot"></span>LunarSim</a>
+  <nav class="nav">
+    <a href="/">Home</a>
+    <a href="/play/" aria-current="page">Where on the Moon?</a>
+    <a href="/sunlab/">Sun Lab</a>
+    <a href="/research/">Research</a>
+  </nav>
+</div></header>
+
+<main class="wrap game">
+  <!-- start screen -->
+  <div id="screen-start" class="screen">
+    <h1>Where on the Moon?</h1>
+    <p class="lead">A rover has lost track of where it is. You see its camera view. Find the matching place among six
+    map images before the timer runs out.</p>
+    <div class="grid-3 how">
+      <div class="card"><h3>1. Look</h3><p>Study the rover’s view: the horizon, craters and rocks. Shadows are
+      the trap: the map was usually made with the Sun somewhere else.</p></div>
+      <div class="card"><h3>2. Pick</h3><p>Click the map image you think shows the same place, or press
+      <span class="kbd">1</span>–<span class="kbd">6</span>. You have 30 seconds.</p></div>
+      <div class="card"><h3>3. Compare</h3><p>See the answer, and what the rover’s AI and an Earth-trained AI
+      picked. A correct answer that the rover AI got wrong earns a “beat the rover” badge.</p></div>
+    </div>
+    <div class="start-actions">
+      <button class="btn btn-primary" id="btn-mission">Start a mission (10 rounds)</button>
+      <span class="muted">Difficulty rises as the Sun moves.</span>
+    </div>
+    <div class="practice">
+      <div class="eyebrow">Or practise one lighting condition</div>
+      <div class="chips" id="practice-chips"></div>
+    </div>
+    <div id="consent-box" class="callout consent" hidden>
+      <label><input type="checkbox" id="consent"> Share my anonymous answers for research.</label>
+      <div class="muted" id="consent-text"></div>
+    </div>
+    <p class="muted best" id="best-line"></p>
+  </div>
+
+  <!-- round screen -->
+  <div id="screen-round" class="screen" hidden>
+    <div class="topbar">
+      <div><span class="muted">Round</span> <b id="r-num">1</b>/<span id="r-total">10</span></div>
+      <div><span class="muted">Score</span> <b id="r-score">0</b></div>
+      <div><span class="muted">Streak</span> <b id="r-streak">0</b></div>
+      <div class="cond-label" id="r-cond"></div>
+    </div>
+    <div class="timer"><div class="timer-fill" id="timer-fill"></div></div>
+    <div class="round-grid">
+      <figure class="query">
+        <div class="frame"><img id="q-img" alt="Rover camera view"></div>
+        <figcaption><b>Rover camera</b> · <span id="q-sun"></span></figcaption>
+      </figure>
+      <div>
+        <div class="opts-head"><b>Map images</b> <span class="muted">· all taken with the Sun at azimuth 135°, elevation 30°</span></div>
+        <div class="opts" id="opts"></div>
+      </div>
+    </div>
+    <div class="reveal" id="reveal" hidden>
+      <div class="verdict" id="verdict"></div>
+      <p id="explain" class="muted"></p>
+      <button class="btn btn-primary" id="btn-next">Next round</button>
+    </div>
+  </div>
+
+  <!-- end screen -->
+  <div id="screen-end" class="screen" hidden>
+    <h1 id="end-title">Mission complete</h1>
+    <div class="grid-3 end-stats">
+      <div class="card"><div class="stat" id="e-you"></div><div class="stat-label">You</div></div>
+      <div class="card"><div class="stat" id="e-gal"></div><div class="stat-label">Rover AI (Galatea) on the same rounds</div></div>
+      <div class="card"><div class="stat" id="e-terr"></div><div class="stat-label">Earth-trained AI (DINOv2-SALAD) on the same rounds</div></div>
+    </div>
+    <p class="lead" id="end-summary"></p>
+    <div class="recap" id="recap"></div>
+    <div class="btn-row">
+      <button class="btn btn-primary" id="btn-again">Play again</button>
+      <button class="btn" id="btn-share">Copy my result</button>
+      <a class="btn" href="/research/">How the AI works</a>
+    </div>
+    <p class="muted" id="share-msg"></p>
+  </div>
+  <noscript><p>This game needs JavaScript.</p></noscript>
+</main>
+
+<footer class="site-footer"><div class="wrap">
+  <div>Images: LunarSim-VPR test set (synthetic renders). AI picks are precomputed from the models in the paper.</div>
+  <div><a href="/research/">Research</a> · <a href="https://github.com/RaunakDune/galatea-lunar-vpr">Code</a></div>
+</div></footer>
+<script src="/assets/game.js"></script>
+</body>
+</html>
