@@ -33,6 +33,7 @@
     <a class="btn btn-primary" href="/play/">Play “Where on the Moon?”</a>
     <a class="btn" href="/research/">Read about the research</a>
   </div>
+  <p class="muted" style="margin-top:20px">By <a href="/contact" id="author-mail" data-u="anjabrasr" data-d="ude.hu">Raunak Sarbajna</a></p>
 </div></section>
 
 <section><div class="wrap">
@@ -93,6 +94,17 @@
     f.innerHTML = '<img loading="lazy" alt="Lunar surface, Sun ' + it[1] + '" src="' + base + it[0] + '.webp"><figcaption>' + it[1] + '</figcaption>';
     box.appendChild(f);
   });
+})();
+</script>
+<script>
+(function () {
+  // The address is assembled only when a person interacts with the link, so it never appears in the page source.
+  var a = document.getElementById('author-mail');
+  if (!a) return;
+  function rev(x) { return x.split('').reverse().join(''); }
+  function arm() { a.href = 'mai' + 'lto:' + rev(a.dataset.u) + '\u0040' + rev(a.dataset.d); }
+  ['mouseenter', 'focus', 'touchstart'].forEach(function (e) { a.addEventListener(e, arm, { once: true, passive: true }); });
+  a.addEventListener('click', function () { arm(); });
 })();
 </script>
 </body>

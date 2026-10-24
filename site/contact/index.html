@@ -1,0 +1,18 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Contact — LunarSim</title><meta name="robots" content="noindex">
+<link rel="icon" href="/assets/favicon.svg" type="image/svg+xml"><link rel="stylesheet" href="/assets/style.css"></head>
+<body><header class="site-header"><div class="wrap"><a class="brand" href="/"><span class="brand-dot"></span>LunarSim</a>
+<nav class="nav"><a href="/">Home</a><a href="/play/">Where on the Moon?</a><a href="/sunlab/">Sun Lab</a><a href="/research/">Research</a></nav></div></header>
+<main class="wrap hero"><h1>Contact</h1>
+<p class="lead">Raunak Sarbajna, Department of Computer Science, University of Houston.</p>
+<p>Email: <span id="addr">rsarbajna [at] uh [dot] edu</span></p>
+<p class="muted">The address is written out this way to keep it away from spam bots.</p></main>
+<script>
+(function () {
+  var u = 'anjabrasr'.split('').reverse().join(''), d = 'ude.hu'.split('').reverse().join('');
+  var a = document.createElement('a'); a.textContent = 'Write an email';
+  a.href = '#'; a.addEventListener('click', function (e) { e.preventDefault(); location.href = 'mai' + 'lto:' + u + '@' + d; });
+  var el = document.getElementById('addr'); el.appendChild(document.createTextNode(' · ')); el.appendChild(a);
+})();
+</script></body></html>
