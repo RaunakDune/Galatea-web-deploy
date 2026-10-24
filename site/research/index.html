@@ -40,12 +40,21 @@
   sharp shadows that move over the lunar day; crater fields look statistically alike everywhere; and lunar soil
   reflects light in unusual ways.</p>
   <div class="grid-3" style="margin-top:12px">
-    <div class="card"><h3>A benchmark</h3><p>LunarSim-VPR renders the same rover positions under seven Sun directions, so
-      changes in accuracy are caused by lighting alone.</p></div>
-    <div class="card"><h3>A framework</h3><p>Galatea treats both stages of place recognition as optimal transport: pooling
-      image features into one descriptor, and checking local feature matches.</p></div>
-    <div class="card"><h3>A controlled study</h3><p>Three seeds per model and paired confidence intervals show which
-      design choices matter for lunar navigation, and which do not.</p></div>
+    <div class="card"><h3>Benchmark: LunarSim-VPR</h3><p>Procedural scenes combine a 16.4&nbsp;km regional DEM
+      (16&nbsp;m/px) with a 0.3&nbsp;m/px local DEM, lunar-Lambert photometry with an opposition surge, and cast shadows
+      from both. Each query pose is rendered under seven solar geometries (azimuth 135–315°, elevation 6–60°)
+      against a database fixed at 135°/30°, which separates illumination change from viewpoint change. Test split:
+      3 unseen scenes, 450 database images, 3,150 queries.</p></div>
+    <div class="card"><h3>Method: optimal transport in both stages</h3><p>Stage&nbsp;1 aggregates DINOv2 ViT-B/14 patch
+      tokens by a semi-relaxed unbalanced OT assignment to 64 clusters and a dust-bin; its relaxation
+      λ&nbsp;∈&nbsp;[0,&nbsp;1] recovers the NetVLAD (λ&nbsp;=&nbsp;0) and SALAD (λ&nbsp;=&nbsp;1) assignments. Stage&nbsp;2
+      re-ranks the top 10 candidates by partial fused Gromov–Wasserstein matching of SuperPoint keypoints, fused with
+      the global similarity through a saturating rule with bounded override.</p></div>
+    <div class="card"><h3>Evaluation protocol</h3><p>Recall@k with a true match defined as &lt;&nbsp;10&nbsp;m and
+      &lt;&nbsp;60° heading difference. All main and assignment-family configurations are trained with three seeds,
+      with frozen and with partially fine-tuned backbones; differences are reported with 95% paired bootstrap confidence intervals over
+      queries. All hyperparameters (fusion β and κ, backbone learning rate) are selected on a held-out validation
+      scene.</p></div>
   </div>
 </div></section>
 
