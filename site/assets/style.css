@@ -109,3 +109,5 @@ pre.cite { background: var(--bg-soft); border: 1px solid var(--line); border-rad
   section { padding: 36px 0; }
   .hero { padding: 36px 0 28px; }
 }
+.btn-dark { background: #1d1d1f; color: #fff; border-color: #1d1d1f; }
+.btn-dark:hover { background: #3a3a3d; }
