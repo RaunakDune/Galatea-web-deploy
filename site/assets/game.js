@@ -1,4 +1,4 @@
-/* Where on the Moon? — LunarSim place-recognition game. No dependencies. */
+/* Where on the Moon?: LunarSim place-recognition game. No dependencies. */
 (function () {
   'use strict';
   var ROUND_SECONDS = 30;

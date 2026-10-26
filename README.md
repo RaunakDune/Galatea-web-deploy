@@ -2,14 +2,14 @@
 
 Website for **LunarSim / Galatea** (visual place recognition on the Moon) and the game **Where on the Moon?**
 
-- `site/` — the static website (no build step)
+- `site/`: the static website (no build step)
   - `index.html` home · `play/` the game · `sunlab/` Sun Lab · `research/` method and results
-  - `data/trials.json` — 3,150 game rounds built from the LunarSim-VPR test set
-  - `data/img/` — the test images (WebP) · `data/sunlab*` — Sun Lab renders and model ranks
-  - `data/config.json` — game settings; **research data collection is off** (`"collect": false`)
-- `functions/api/log.js` — Cloudflare Pages Function that stores anonymous game answers in D1 (only used when collection is switched on)
-- `schema.sql` — D1 table for those answers
-- `tools/` — scripts that regenerate the game data from the research repository
+  - `data/trials.json`: 3,150 game rounds built from the LunarSim-VPR test set
+  - `data/img/`: the test images (WebP) · `data/sunlab*`: Sun Lab renders and model ranks
+  - `data/config.json`: game settings; **research data collection is off** (`"collect": false`)
+- `functions/api/log.js`: Cloudflare Pages Function that stores anonymous game answers in D1 (only used when collection is switched on)
+- `schema.sql`: D1 table for those answers
+- `tools/`: scripts that regenerate the game data from the research repository
 
 Research code, paper and benchmark: <https://github.com/RaunakDune/galatea-lunar-vpr>
 
