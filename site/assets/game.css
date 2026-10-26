@@ -4,7 +4,7 @@
 .start-actions { display: flex; align-items: center; gap: 14px; flex-wrap: wrap; margin: 8px 0 22px; }
 .practice { margin-bottom: 18px; }
 .chips { display: flex; flex-wrap: wrap; gap: 8px; }
-.chip { border: 1px solid var(--line); background: #fff; border-radius: 999px; padding: 6px 12px; font: 500 .9rem var(--font); cursor: pointer; color: var(--text); }
+.chip { border: 1px solid var(--line); background: #fff; border-radius: 999px; padding: 6px 12px; font: 500 .9rem var(--f-display); cursor: pointer; color: var(--text); }
 .chip:hover { background: var(--bg-soft); }
 .chip small { color: var(--muted); margin-left: 4px; }
 .consent { margin: 10px 0 14px; max-width: 760px; }
@@ -30,12 +30,12 @@
 .opt:hover:not(:disabled) { border-color: var(--accent); }
 .opt:focus-visible { outline: 3px solid var(--accent); outline-offset: 2px; }
 .opt:disabled { cursor: default; }
-.opt .num { position: absolute; top: 6px; left: 6px; background: rgba(255,255,255,.92); color: #222; font: 700 .8rem var(--font); border-radius: 4px; padding: 0 6px; }
+.opt .num { position: absolute; top: 6px; left: 6px; background: rgba(255,255,255,.92); color: #222; font: 500 .8rem var(--mono); border-radius: 4px; padding: 0 6px; }
 .opt.correct { border-color: var(--good); box-shadow: 0 0 0 2px var(--good); }
 .opt.wrong { border-color: var(--bad); box-shadow: 0 0 0 2px var(--bad); }
 .opt.dim img { opacity: .45; }
 .opt .tags { position: absolute; bottom: 6px; left: 6px; right: 6px; display: flex; flex-wrap: wrap; gap: 4px; }
-.opt .tag { background: rgba(255,255,255,.95); color: #222; font: 600 .72rem var(--font); border-radius: 4px; padding: 1px 6px; }
+.opt .tag { background: rgba(255,255,255,.95); color: #222; font: 600 .72rem var(--f-display); border-radius: 4px; padding: 1px 6px; }
 .opt .tag.you { background: #1d1d1f; color: #fff; }
 
 .reveal { margin-top: 18px; border-top: 1px solid var(--line); padding-top: 14px; }
@@ -50,4 +50,6 @@
 .recap .cell.ok { border-color: var(--good); }
 .recap .cell.no { border-color: var(--bad); }
 .recap img { aspect-ratio: 4/3; object-fit: cover; width: 100%; }
-.recap .lbl { position: absolute; bottom: 2px; left: 3px; font: 700 .7rem var(--font); color: #fff; text-shadow: 0 0 3px #000; }
+.recap .lbl { position: absolute; bottom: 2px; left: 3px; font: 500 .7rem var(--mono); color: #fff; text-shadow: 0 0 3px #000; }
+.topbar, .verdict, .opts-head, .consent label, .cond-label, .query figcaption { font-family: var(--f-display); }
+.topbar b { font-family: var(--mono); font-weight: 500; }
