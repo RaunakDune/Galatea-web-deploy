@@ -124,3 +124,9 @@ td { font-variant-numeric: tabular-nums; }
 td:not(:first-child) { font-family: var(--mono); font-size: .88rem; }
 thead th { font-family: var(--mono); font-weight: 500; font-size: .72rem; text-transform: uppercase; letter-spacing: .06em; }
 .stat-label, figcaption { font-stretch: 95%; }
+
+/* tilted-camera examples on the research page */
+.tilts { display: grid; grid-template-columns: repeat(6, 1fr); gap: 6px; margin-top: 16px; }
+.tilts figure img { border-radius: 6px; width: 100%; aspect-ratio: 4/3; object-fit: cover; background: #000; }
+.tilts figcaption { font-size: .78rem; margin-top: 4px; text-align: center; }
+@media (max-width: 820px) { .tilts { grid-template-columns: repeat(3, 1fr); } }

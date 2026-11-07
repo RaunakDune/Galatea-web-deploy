@@ -170,6 +170,71 @@
   </div>
 </div></section>
 
+<section id="robustness"><div class="wrap">
+  <h2>Robustness to camera tilt and viewpoint</h2>
+  <p class="lead">The benchmark queries are upright and close to where the map images were taken. To see how far
+  that holds, we changed one property of the query camera at a time (roll, pitch, distance from the mapped place,
+  heading or height), re-rendered all 3,150 test queries at their exact positions under all seven Sun conditions,
+  and searched the same upright map.</p>
+  <div class="tilts">
+    <figure><img src="/figures/tilt_upright.webp" alt="Upright rover view" loading="lazy"><figcaption>Upright</figcaption></figure>
+    <figure><img src="/figures/tilt_roll15.webp" alt="Same view with the camera rolled 15 degrees" loading="lazy"><figcaption>Roll 15°</figcaption></figure>
+    <figure><img src="/figures/tilt_roll180.webp" alt="Same view upside down" loading="lazy"><figcaption>Roll 180°</figcaption></figure>
+    <figure><img src="/figures/tilt_roll180_levelled.webp" alt="Upside-down view levelled with gravity, black where the rolled camera saw nothing" loading="lazy"><figcaption>Roll 180°, levelled</figcaption></figure>
+    <figure><img src="/figures/tilt_pitch_up30.webp" alt="Camera pitched 30 degrees up, mostly sky" loading="lazy"><figcaption>Pitch 30° up</figcaption></figure>
+    <figure><img src="/figures/tilt_pitch_down15.webp" alt="Camera pitched 15 degrees down, mostly near ground" loading="lazy"><figcaption>Pitch 15° down</figcaption></figure>
+  </div>
+  <p class="muted" style="font-size:.9rem;margin-top:8px">Tilted views are rendered exactly: the renderer produces a wider
+  upright view at three times the resolution and reprojects it through the camera rotation, so no image is simply
+  rotated or blurred. Roll turns the camera about its viewing direction, so an upside-down camera sees the same
+  scene upside down.</p>
+
+  <figure class="figure-box" style="margin-top:22px">
+      <img src="/figures/robustness.webp" alt="Recall@1 against roll, gravity-corrected roll, pitch, position offset, heading change and camera height for five models" loading="lazy">
+      <figcaption>Recall@1 as one property of the query camera changes. The full study, including re-ranking and
+      every intermediate setting, is in the paper’s supplementary material.</figcaption>
+  </figure>
+
+  <div class="grid-2" style="align-items:start;margin-top:22px">
+    <div class="table-wrap">
+      <table>
+        <thead><tr><th>Query camera</th><th>Galatea, frozen</th><th>NetVLAD, fine-tuned</th></tr></thead>
+        <tbody>
+          <tr><td>Upright (benchmark)</td><td>59.8 ± 1.1</td><td>77.2 ± 0.5</td></tr>
+          <tr class="group"><td colspan="3">Roll</td></tr>
+          <tr><td>5°</td><td>41.1 ± 1.5</td><td>61.3 ± 2.6</td></tr>
+          <tr><td>15°</td><td>19.5 ± 1.6</td><td>40.5 ± 1.4</td></tr>
+          <tr><td>180° (upside down)</td><td>7.8 ± 0.3</td><td>5.4 ± 1.1</td></tr>
+          <tr><td>180°, levelled with gravity</td><td>46.9 ± 1.9</td><td>72.4 ± 0.7</td></tr>
+          <tr class="group"><td colspan="3">Pitch</td></tr>
+          <tr><td>15° down</td><td>31.7 ± 1.5</td><td>44.6 ± 2.4</td></tr>
+          <tr><td>30° up (mostly sky)</td><td>32.1 ± 0.3</td><td>33.5 ± 4.4</td></tr>
+          <tr class="group"><td colspan="3">Viewpoint</td></tr>
+          <tr><td>8 m from the mapped place</td><td>42.2 ± 1.0</td><td>53.6 ± 0.9</td></tr>
+          <tr><td>Heading turned by 30°</td><td>17.6 ± 0.6</td><td>30.7 ± 0.7</td></tr>
+          <tr><td>Camera at 4 m (map: 1.5 m)</td><td>29.0 ± 1.4</td><td>32.5 ± 0.7</td></tr>
+        </tbody>
+      </table>
+      <p class="muted" style="font-size:.85rem;margin-top:6px">Recall@1 (%) over all seven Sun conditions, mean ± standard
+      deviation over three seeds. A random guess scores 2.2%.</p>
+    </div>
+    <div style="display:grid;gap:14px">
+      <div class="card"><h3>Roll is the main weakness</h3><p>A roll of only 1° costs 4 points, 5° costs 19 and
+      15° costs 40. From 45° on, no model, Earth-trained or lunar-trained, reaches 11%. Fine-tuning the backbone
+      raises every number but loses about as much. No training or map image is ever tilted, and the image features
+      are not rotation-invariant.</p></div>
+      <div class="card"><h3>Levelling with gravity recovers most of it</h3><p>Rotating the image back to upright with
+      the rover’s accelerometer brings an upside-down view back to 46.9% (fine-tuned NetVLAD: 72.4%). What remains
+      comes from the black regions outside the tilted frame. With the camera tilted up into the sky, Galatea holds
+      up better than NetVLAD (frozen: 32.1% vs 20.9%), consistent with its dust-bin discarding sky.</p></div>
+      <div class="card"><h3>Heading matters more than position</h3><p>Standing 8&nbsp;m from the mapped place costs
+      21 points, but turning by 30° costs 42: each place is mapped from one direction, and most of the frame is
+      nearby ground that changes completely when the rover turns. Camera height should also match the map: 1&nbsp;m
+      or 2.5&nbsp;m instead of 1.5&nbsp;m costs 9 to 12 points.</p></div>
+    </div>
+  </div>
+</div></section>
+
 <section id="takeaways"><div class="wrap">
   <h2>What this means for lunar navigation</h2>
   <ol style="max-width:820px">
@@ -180,6 +245,9 @@
     <li><strong>Use local evidence to adjust the global ranking, not to replace it.</strong> Local evidence on the Moon is plentiful but unreliable. Fuse it with the
     global score so that overturning a confident global decision needs strong local evidence; then the cheapest matcher
     is good enough.</li>
+    <li><strong>Level the image, and map each place from several directions.</strong> Rotate images to upright with the
+    rover’s accelerometer before searching, record the map at the camera height used in operation, and include
+    several headings per place. Position errors of a few metres cost little.</li>
   </ol>
   <p class="callout" style="max-width:820px">All results come from simulation. The comparisons are paired and made on
   unseen scenes, so we expect them to carry over better than the absolute numbers, but they still need to be
