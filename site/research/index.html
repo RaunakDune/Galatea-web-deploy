@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Research | Galatea: optimal transport for lunar place recognition</title>
-<meta name="description" content="Galatea: an optimal transport framework for merging global and local descriptors in visual place recognition on extraterrestrial surfaces. Method, benchmark and results.">
+<meta name="description" content="Galatea: what matters for visual place recognition on the Moon? An optimal-transport analysis of aggregation and re-ranking. Method, benchmark and results.">
 <link rel="icon" href="/assets/favicon.svg" type="image/svg+xml">
 <link rel="preload" href="/assets/fonts/archivo-latin-standard-normal.woff2" as="font" type="font/woff2" crossorigin>
 <link rel="preload" href="/assets/fonts/source-serif-4-latin-opsz-normal.woff2" as="font" type="font/woff2" crossorigin>
@@ -26,7 +26,7 @@
 <main>
 <section class="hero"><div class="wrap">
   <div class="eyebrow">Research</div>
-  <h1>Galatea: an optimal transport framework for merging global and local descriptors in visual place recognition on extraterrestrial surfaces</h1>
+  <h1>Galatea: what matters for visual place recognition on the Moon? An optimal-transport analysis of aggregation and re-ranking</h1>
   <p class="muted">Raunak Sarbajna and Christoph F. Eick · Department of Computer Science, University of Houston · manuscript in preparation</p>
   <div class="btn-row">
     <a class="btn btn-primary" href="https://github.com/RaunakDune/galatea-lunar-vpr/blob/main/paper/main.pdf">Paper (PDF)</a>
@@ -99,7 +99,7 @@
     <div>
       <h3>A family of pooling rules</h3>
       <p>The first stage solves a <em>semi-relaxed unbalanced</em> transport problem with one parameter, λ. At λ&nbsp;=&nbsp;0
-      it is exactly the assignment of NetVLAD, at λ&nbsp;=&nbsp;1 exactly that of SALAD, and Galatea can also learn λ. The
+      it is exactly the assignment of NetVLAD, at λ&nbsp;=&nbsp;1 exactly that of SALAD. The
       dust-bin lets the model throw away features that say nothing about the place, such as black sky.</p>
       <p>We prove that the iterations converge at rate λ, that the dust-bin acts as a logistic gate, and that after
       normalisation the descriptor depends on the transport plan only through a weight per feature. That last result
@@ -135,16 +135,16 @@
           <tr><td>NetVLAD</td><td>58.2 ± 0.7</td><td>86.6</td><td>46.7</td></tr>
           <tr><td>OT, λ = 0</td><td>59.9 ± 0.8</td><td>87.6</td><td>48.4</td></tr>
           <tr><td>OT, λ = 1 (SALAD)</td><td>59.4 ± 0.7</td><td>87.3</td><td>48.6</td></tr>
-          <tr><td>OT, learned λ (Galatea)</td><td>59.8 ± 0.8</td><td>87.3</td><td>47.6</td></tr>
+          <tr><td>OT, λ ≈ 0.5</td><td>59.8 ± 0.8</td><td>87.3</td><td>47.6</td></tr>
           <tr class="group"><td colspan="4">Lunar-trained, backbone fine-tuned</td></tr>
           <tr><td>GeM pooling</td><td>50.7 ± 3.2</td><td>81.4</td><td>42.0</td></tr>
           <tr><td>NetVLAD</td><td>76.4 ± 0.7</td><td>94.3</td><td>64.3</td></tr>
           <tr><td>OT, λ = 0</td><td>73.1 ± 1.1</td><td>93.3</td><td>61.9</td></tr>
           <tr><td>OT, λ = 1 (SALAD)</td><td>73.5 ± 0.5</td><td>94.0</td><td>62.2</td></tr>
-          <tr><td>OT, learned λ (Galatea)</td><td>71.3 ± 1.2</td><td>93.0</td><td>60.1</td></tr>
+          <tr><td>OT, λ ≈ 0.5</td><td>71.3 ± 1.2</td><td>93.0</td><td>60.1</td></tr>
           <tr class="group"><td colspan="4">With global–local fusion (partial FGW)</td></tr>
-          <tr><td>Galatea head, frozen</td><td>66.1 ± 0.1</td><td>–</td><td>–</td></tr>
-          <tr><td>Galatea head, fine-tuned</td><td>74.5 ± 0.8</td><td>–</td><td>63.0</td></tr>
+          <tr><td>OT λ ≈ 0.5, frozen</td><td>66.1 ± 0.1</td><td>–</td><td>–</td></tr>
+          <tr><td>OT λ ≈ 0.5, fine-tuned</td><td>74.5 ± 0.8</td><td>–</td><td>63.0</td></tr>
           <tr><td>NetVLAD, fine-tuned (full system)</td><td class="best">78.8 ± 0.5</td><td class="best">95.3</td><td class="best">66.9</td></tr>
         </tbody>
       </table>
@@ -162,8 +162,8 @@
       adds to the same model. A more flexible model
       fits the training light more closely, so fine-tuning only helps together with varied lighting.</p></div>
     <div class="card"><h3>The choice of λ has little effect</h3><p>With a frozen backbone, every λ from 0 to 1 gives the same accuracy
-      within 1.5 points, as the theory predicts. With fine-tuning the spread stays small, and a learned λ simply stays
-      at its starting value. NetVLAD’s residual pooling, a different design choice, pulls ahead by 4.5 points.</p></div>
+      within 1.5 points, as the theory predicts. Training cannot choose λ: a trainable λ ends where it starts, and even
+      with a 100-fold learning rate it drifts without converging, so λ should be fixed. NetVLAD’s residual pooling, a different design choice, pulls ahead by 4.5 points.</p></div>
     <div class="card"><h3>How evidence is fused matters more than the matcher</h3><p>Ranking by local matches alone rescues 15% of queries but
       breaks 16% that were right. Fused with the global score, it keeps half the rescues and breaks only 2.4%. With
       fusion, a training-free matcher, simple nearest neighbours and the learned LightGlue perform alike.</p></div>
@@ -266,8 +266,8 @@
 <section id="cite"><div class="wrap">
   <h2>Cite</h2>
 <pre class="cite">@misc{sarbajna2026galatea,
-  title  = {Galatea: An Optimal Transport Framework for Merging Global and Local Descriptors
-            in Visual Place Recognition on Extraterrestrial Surfaces},
+  title  = {Galatea: What Matters for Visual Place Recognition on the Moon? An Optimal-Transport
+            Analysis of Aggregation and Re-ranking},
   author = {Sarbajna, Raunak and Eick, Christoph F.},
   year   = {2026},
   note   = {Manuscript in preparation. Code: https://github.com/RaunakDune/galatea-lunar-vpr}
