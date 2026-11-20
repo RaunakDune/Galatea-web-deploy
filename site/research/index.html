@@ -198,7 +198,7 @@
   <div class="grid-2" style="align-items:start;margin-top:22px">
     <div class="table-wrap">
       <table>
-        <thead><tr><th>Query camera</th><th>Galatea, frozen</th><th>NetVLAD, fine-tuned</th></tr></thead>
+        <thead><tr><th>Query camera</th><th>OT λ ≈ 0.5, frozen</th><th>NetVLAD, fine-tuned</th></tr></thead>
         <tbody>
           <tr><td>Upright (benchmark)</td><td>59.8 ± 1.1</td><td>77.2 ± 0.5</td></tr>
           <tr class="group"><td colspan="3">Roll</td></tr>
@@ -225,13 +225,86 @@
       are not rotation-invariant.</p></div>
       <div class="card"><h3>Levelling with gravity recovers most of it</h3><p>Rotating the image back to upright with
       the rover’s accelerometer brings an upside-down view back to 46.9% (fine-tuned NetVLAD: 72.4%). What remains
-      comes from the black regions outside the tilted frame. With the camera tilted up into the sky, Galatea holds
+      comes from the black regions outside the tilted frame. With the camera tilted up into the sky, the OT head holds
       up better than NetVLAD (frozen: 32.1% vs 20.9%), consistent with its dust-bin discarding sky.</p></div>
       <div class="card"><h3>Heading matters more than position</h3><p>Standing 8&nbsp;m from the mapped place costs
       21 points, but turning by 30° costs 42: each place is mapped from one direction, and most of the frame is
       nearby ground that changes completely when the rover turns. Camera height should also match the map: 1&nbsp;m
       or 2.5&nbsp;m instead of 1.5&nbsp;m costs 9 to 12 points.</p></div>
     </div>
+  </div>
+</div></section>
+
+<section id="real"><div class="wrap">
+  <h2>First tests on real Apollo photographs</h2>
+  <p class="lead">Everything above comes from simulation. To see what carries over, we built two small benchmarks
+  from the Apollo Hasselblad surface photography, using the panoramas the astronauts shot at each traverse
+  station.</p>
+  <div class="grid-2" style="align-items:start">
+    <div>
+      <h3>Real photos against real photos</h3>
+      <p>The Apollo Lunar Surface Journal lists which frames form each panorama and where it was taken. From it we kept
+      79 ordinary surface pans: 1,640 frames at 47 stations on all six landing missions. A query is a frame
+      from one pan; the map is every other pan of the same mission; a match is correct when it comes from the same
+      station. Two pans of one station differ in photographer, time (often a different moonwalk, so a different Sun
+      elevation), exact standpoint and heading. We score Apollo&nbsp;15, 16 and 17: 958 queries from 41 pans at 19
+      stations, where a random guess scores 6.5%.</p>
+      <div class="table-wrap">
+        <table>
+          <thead><tr><th>Model</th><th>Recall@1 (95% CI)</th></tr></thead>
+          <tbody>
+            <tr class="group"><td colspan="2">Earth-trained, used as is</td></tr>
+            <tr><td>DINOv2-SALAD</td><td>34.4 [26.8, 42.7]</td></tr>
+            <tr class="group"><td colspan="2">Trained on LunarSim, frozen backbone</td></tr>
+            <tr><td>GeM pooling</td><td>24.7 [20.0, 30.0]</td></tr>
+            <tr><td>NetVLAD</td><td>33.0 [25.0, 41.6]</td></tr>
+            <tr><td>OT, λ = 0</td><td>33.4 [26.5, 40.4]</td></tr>
+            <tr><td>OT, λ = 1 (SALAD)</td><td>36.5 [28.9, 43.9]</td></tr>
+            <tr><td>OT, λ ≈ 0.5</td><td>31.8 [24.5, 39.2]</td></tr>
+            <tr class="group"><td colspan="2">Trained on LunarSim, backbone fine-tuned</td></tr>
+            <tr><td>NetVLAD</td><td>34.6 [27.0, 42.4]</td></tr>
+            <tr><td>OT, λ ≈ 0.5</td><td>36.1 [29.4, 43.0]</td></tr>
+          </tbody>
+        </table>
+      </div>
+      <p class="muted" style="font-size:.85rem;margin-top:6px">Mean over three seeds; confidence intervals resample
+      query pans. Global retrieval only, without re-ranking.</p>
+    </div>
+    <div>
+      <h3>Real photos against a rendered map</h3>
+      <p>This is the setting a rover would face: real queries, and a map rendered from orbital data. We rendered nine
+      Apollo&nbsp;15 stations, 12 headings each, from the LROC NAC 2&nbsp;m elevation model of the Hadley–Apennine site,
+      with the Sun placed where it stood when each station's pans were taken. The map views were then made
+      photographic with <a href="#related">DESPINA</a>, and compared with plain shaded renders of the same
+      elevation model. 261 real frames from 14 pans are the queries; a random guess scores 11.1%.</p>
+      <div class="table-wrap">
+        <table>
+          <thead><tr><th>Model</th><th>DESPINA map</th><th>Shaded map</th></tr></thead>
+          <tbody>
+            <tr><td>DINOv2-SALAD, Earth-trained</td><td>11.1 [4.8, 18.4]</td><td>15.3 [6.4, 25.3]</td></tr>
+            <tr><td>NetVLAD, frozen</td><td>12.1 [7.2, 18.0]</td><td>11.2 [4.7, 18.8]</td></tr>
+            <tr><td>OT λ ≈ 0.5, frozen</td><td>11.9 [6.6, 18.2]</td><td>11.7 [6.5, 17.9]</td></tr>
+            <tr><td>NetVLAD, fine-tuned</td><td class="best">20.6 [13.4, 28.7]</td><td>12.9 [6.3, 20.6]</td></tr>
+            <tr><td>OT λ ≈ 0.5, fine-tuned</td><td>17.2 [10.7, 24.9]</td><td>18.0 [9.8, 27.4]</td></tr>
+          </tbody>
+        </table>
+      </div>
+      <p class="muted" style="font-size:.85rem;margin-top:6px">Recall@1 (%) at station level, mean over three seeds,
+      95% intervals resampling query pans. Station&nbsp;6 lies just outside the elevation model and is left out.</p>
+    </div>
+  </div>
+  <div class="grid-3" style="margin-top:24px">
+    <div class="card"><h3>Simulation gains do not carry over yet</h3><p>Fine-tuning adds about 12 points in LunarSim, but
+      on real photographs every OT, NetVLAD and SALAD head lands within about 3 points of the Earth-trained model. The
+      result holds with full frames instead of the centre crop, and without queries at the landing site, where the
+      lander itself is visible.</p></div>
+    <div class="card"><h3>Matching real photos to a rendered map is the hard case</h3><p>Against the rendered map, the
+      Earth-trained model is at chance. Only the heads fine-tuned on LunarSim clear chance, the first sign that
+      simulation training helps on real imagery. DESPINA's photographic map helps fine-tuned NetVLAD by 7.7 points,
+      but the interval (−0.8 to +14.6) still includes zero.</p></div>
+    <div class="card"><h3>Which findings survive</h3><p>GeM pooling is worst on real images too. The real data cannot yet
+      separate OT, NetVLAD and SALAD. These are first, small tests: station positions come from 1971 traverse
+      navigation, many frames show mostly nearby ground, and only 14 pans are scored against the rendered map.</p></div>
   </div>
 </div></section>
 
@@ -249,9 +322,9 @@
     rover’s accelerometer before searching, record the map at the camera height used in operation, and include
     several headings per place. Position errors of a few metres cost little.</li>
   </ol>
-  <p class="callout" style="max-width:820px">All results come from simulation. The comparisons are paired and made on
-  unseen scenes, so we expect them to carry over better than the absolute numbers, but they still need to be
-  confirmed on real lunar imagery.</p>
+  <p class="callout" style="max-width:820px">These recommendations come from simulation. The first tests on real Apollo
+  photographs (above) show that the gains from lunar training largely disappear on real imagery, so closing the gap
+  between simulation and real photographs is the main open problem.</p>
 </div></section>
 
 <section id="related"><div class="wrap">
@@ -259,8 +332,8 @@
   <p style="max-width:820px"><a href="https://doi.org/10.5194/isprs-annals-XI-2-2026-881-2026">DESPINA</a>
   (Nelson-Archer, Sarbajna and Eick, ISPRS Annals 2026) synthesises photorealistic lunar horizon views for a given
   location from orbital elevation models with diffusion models. LunarSim gives exact control of the Sun; DESPINA
-  gives realistic appearance for real sites. A real-imagery evaluation of Galatea at the Apollo 17 landing site is
-  planned.</p>
+  gives realistic appearance for real sites. We used it to render the map for the
+  <a href="#real">Apollo&nbsp;15 test</a> above.</p>
 </div></section>
 
 <section id="cite"><div class="wrap">
