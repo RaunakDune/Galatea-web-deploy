@@ -164,9 +164,10 @@
     <div class="card"><h3>The choice of λ has little effect</h3><p>With a frozen backbone, every λ from 0 to 1 gives the same accuracy
       within 1.5 points, as the theory predicts. Training cannot choose λ: a trainable λ ends where it starts, and even
       with a 100-fold learning rate it drifts without converging, so λ should be fixed. NetVLAD’s residual pooling, a different design choice, pulls ahead by 4.5 points.</p></div>
-    <div class="card"><h3>How evidence is fused matters more than the matcher</h3><p>Ranking by local matches alone rescues 15% of queries but
+    <div class="card"><h3>Fusing local and global evidence</h3><p>Ranking by local matches alone rescues 15% of queries but
       breaks 16% that were right. Fused with the global score, it keeps half the rescues and breaks only 2.4%. With
-      fusion, a training-free matcher, simple nearest neighbours and the learned LightGlue perform alike.</p></div>
+      fusion, a training-free matcher, simple nearest neighbours and the learned LightGlue are within two points of
+      each other, a smaller effect than fusion itself.</p></div>
   </div>
 </div></section>
 
@@ -314,8 +315,8 @@
     <li><strong>Train under many Sun directions.</strong> An illumination sweep in the training data, from a renderer
     or from elevation-model pipelines, matters more than backbone fine-tuning or the choice of assignment.</li>
     <li><strong>Adapt the backbone, then choose the pooling.</strong> Fine-tuning adds 11–19 points for every model.
-    Fix λ rather than learning it; λ&nbsp;=&nbsp;0 is the cheapest.</li>
-    <li><strong>Use local evidence to adjust the global ranking, not to replace it.</strong> Local evidence on the Moon is plentiful but unreliable. Fuse it with the
+    Fix λ, since training cannot set it; λ&nbsp;=&nbsp;0 is the cheapest.</li>
+    <li><strong>Use local evidence to adjust the global ranking.</strong> Local evidence on the Moon is plentiful but unreliable. Fuse it with the
     global score so that overturning a confident global decision needs strong local evidence; then the cheapest matcher
     is good enough.</li>
     <li><strong>Level the image, and map each place from several directions.</strong> Rotate images to upright with the
