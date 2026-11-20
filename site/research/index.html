@@ -157,7 +157,7 @@
   </div>
 
   <div class="grid-3" style="margin-top:28px">
-    <div class="card"><h3>Varied lighting in training matters more than fine-tuning</h3><p>Training on the same scenes but with a single Sun
+    <div class="card"><h3>Lighting in the training data</h3><p>Training on the same scenes but with a single Sun
       direction costs 13.6 points with a frozen backbone and 21.5 points with a fine-tuned one, more than fine-tuning
       adds to the same model. A more flexible model
       fits the training light more closely, so fine-tuning only helps together with varied lighting.</p></div>
@@ -228,7 +228,7 @@
       the rover’s accelerometer brings an upside-down view back to 46.9% (fine-tuned NetVLAD: 72.4%). What remains
       comes from the black regions outside the tilted frame. With the camera tilted up into the sky, the OT head holds
       up better than NetVLAD (frozen: 32.1% vs 20.9%), consistent with its dust-bin discarding sky.</p></div>
-      <div class="card"><h3>Heading matters more than position</h3><p>Standing 8&nbsp;m from the mapped place costs
+      <div class="card"><h3>Heading and position</h3><p>Standing 8&nbsp;m from the mapped place costs
       21 points, but turning by 30° costs 42: each place is mapped from one direction, and most of the frame is
       nearby ground that changes completely when the rover turns. Camera height should also match the map: 1&nbsp;m
       or 2.5&nbsp;m instead of 1.5&nbsp;m costs 9 to 12 points.</p></div>
