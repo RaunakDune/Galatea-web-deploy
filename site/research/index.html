@@ -166,8 +166,33 @@
       with a 100-fold learning rate it drifts without converging, so λ should be fixed. NetVLAD’s residual pooling, a different design choice, pulls ahead by 4.5 points.</p></div>
     <div class="card"><h3>Fusing local and global evidence</h3><p>Ranking by local matches alone rescues 15% of queries but
       breaks 16% that were right. Fused with the global score, it keeps half the rescues and breaks only 2.4%. With
-      fusion, a training-free matcher, simple nearest neighbours and the learned LightGlue are within two points of
-      each other, a smaller effect than fusion itself.</p></div>
+      fusion, the matchers we tried are within a few points of each other, a smaller effect than fusion itself; the
+      best is CLIPPER (<a href="#stage2">below</a>).</p></div>
+  </div>
+</div></section>
+
+<section id="stage2"><div class="wrap">
+  <h2>Two more re-ranking tests</h2>
+  <div class="grid-2" style="align-items:start">
+    <div>
+      <h3>CLIPPER, the matcher of LunarLoc</h3>
+      <p>CLIPPER keeps the largest set of keypoint matches whose pairwise distances agree with each other. Added as a
+      fifth scorer, with its tolerance chosen on the validation scene, it is the best fused scorer: 68.7% Recall@1 with
+      MAGSAC++ verification, 2.7 points above partial FGW (95% interval 1.3 to 4.1) and 1.5 above nearest neighbours
+      with MAGSAC++ (0.2 to 2.9).</p>
+      <h3>Exact 3-D distances</h3>
+      <p>Distances between keypoints in the image change when the camera moves, so we gave FGW and CLIPPER the exact
+      3-D position of every keypoint from the renderer. This did not help. FGW lost 1.8 points (−3.3 to −0.4), and 2.0
+      to 3.5 points when the query stands 0–8&nbsp;m from the mapped place; CLIPPER was unchanged. The 3-D distances
+      are almost exact for true matches (0.3% distortion, against 21% in the image), but only about 16% of the
+      keypoints in a query and its true map image have a partner at all, so the structural terms mostly compare
+      keypoints that have nothing to match.</p>
+    </div>
+    <figure class="figure-box">
+      <img src="/figures/rerank_ext.webp" alt="Bar chart of fused Recall@1 by local scorer: global only 60.8, MNN with MAGSAC++ 67.2, LightGlue with MAGSAC++ 65.7, partial FGW 66.0, CLIPPER with MAGSAC++ 68.7, FGW with 3-D distances 64.2, CLIPPER with 3-D distances and MAGSAC++ 68.8" loading="lazy">
+      <figcaption>Recall@1 after re-ranking the top 10 candidates of the frozen OT head, fusion parameters chosen on
+      validation. Blue: CLIPPER.</figcaption>
+    </figure>
   </div>
 </div></section>
 
@@ -269,7 +294,7 @@
         </table>
       </div>
       <p class="muted" style="font-size:.85rem;margin-top:6px">Mean over three seeds; confidence intervals resample
-      query pans. Global retrieval only, without re-ranking.</p>
+      query pans. Global retrieval only; re-ranking is <a href="#real-rerank">below</a>.</p>
     </div>
     <div>
       <h3>Real photos against a rendered map</h3>
@@ -294,6 +319,21 @@
       95% intervals resampling query pans. Station&nbsp;6 lies just outside the elevation model and is left out.</p>
     </div>
   </div>
+  <div class="grid-2" id="real-rerank" style="align-items:start;margin-top:28px">
+    <div>
+      <h3>Re-ranking real photos</h3>
+      <p>We re-ranked each model’s top 10 on the panoramas with the same keypoint matchers and the fusion settings
+      tuned in LunarSim, without any tuning on real data. Fusion helps every model and every matcher, by 5.5 to 7.8
+      points, and every interval is above zero; tuning the settings on two missions and testing on the third gives
+      2.7 to 7.6. The matchers are within about one point of each other. Boulder outlines found with FastSAM, matched
+      the way LunarLoc matches them, changed Recall@1 by −0.9 to +1.4 points.</p>
+    </div>
+    <figure class="figure-box">
+      <img src="/figures/apollo_fusion.webp" alt="Bar chart of Recall@1 on Apollo panoramas before and after FGW fusion: DINOv2-SALAD 34.4 to 42.3, GeM 24.7 to 31.3, NetVLAD 33.0 to 39.0, OT 31.8 to 37.3, fine-tuned NetVLAD 34.6 to 41.1, fine-tuned OT 36.1 to 42.3" loading="lazy">
+      <figcaption>Station-level Recall@1 on 958 Apollo 15–17 queries (random 6.5%), before and after fusing FGW
+      matches into the top 10. Mean over seeds.</figcaption>
+    </figure>
+  </div>
   <div class="grid-3" style="margin-top:24px">
     <div class="card"><h3>Simulation gains do not carry over yet</h3><p>Fine-tuning adds about 12 points in LunarSim, but
       on real photographs every OT, NetVLAD and SALAD head lands within about 3 points of the Earth-trained model. The
@@ -303,9 +343,53 @@
       Earth-trained model is at chance. Only the heads fine-tuned on LunarSim clear chance, the first sign that
       simulation training helps on real imagery. DESPINA's photographic map helps fine-tuned NetVLAD by 7.7 points,
       but the interval (−0.8 to +14.6) still includes zero.</p></div>
-    <div class="card"><h3>Which findings survive</h3><p>GeM pooling is worst on real images too. The real data cannot yet
-      separate OT, NetVLAD and SALAD. These are first, small tests: station positions come from 1971 traverse
+    <div class="card"><h3>Which findings survive</h3><p>Fusion helps on real images as it does in simulation, and GeM
+      pooling is worst on real images too. The real data cannot yet separate OT, NetVLAD and SALAD. These are first, small tests: station positions come from 1971 traverse
       navigation, many frames show mostly nearby ground, and only 14 pans are scored against the rendered map.</p></div>
+  </div>
+</div></section>
+
+<section id="lunarloc"><div class="wrap">
+  <h2>A second simulator: the LunarLoc traverses</h2>
+  <p class="lead">LunarLoc (Thomas et al., IEEE Aerospace 2026) released the rover runs behind its paper, rendered in
+  the Lunar Autonomy Challenge simulator. They test our models on terrain and rendering that we did not build, under
+  LunarLoc’s three conditions.</p>
+  <div class="grid-2" style="align-items:start">
+    <div>
+      <figure class="figure-box">
+        <img src="/figures/lunarloc_light.webp" alt="The same place in the LunarLoc simulator lit from azimuth 100 degrees at 2 degrees elevation and from azimuth 210 degrees at 10 degrees" loading="lazy">
+        <figcaption>One place under the two Sun directions of the lighting-change runs.</figcaption>
+      </figure>
+      <ul style="margin-top:14px">
+        <li><strong>Same route, same light.</strong> Every model except GeM places 84.7–89.8% of views correctly, and
+        fusion with nearest-neighbour matches adds 7.1–16.4 points.</li>
+        <li><strong>Lighting change.</strong> The frozen OT head is highest (58.6%, Earth-trained SALAD 52.4%, with
+        overlapping intervals). Fine-tuned heads fall to 47.1–49.8%, as on Apollo. CLIPPER fusion adds 8.7–13.7 points,
+        nearest neighbours at most 1.9.</li>
+        <li><strong>Driven the other way.</strong> No view faces within 30° of a map view, so we count views of the same
+        ground as matches; the frozen OT head is again highest (59.3%).</li>
+      </ul>
+    </div>
+    <figure class="figure-box">
+      <img src="/figures/lunarloc_light_chart.webp" alt="Bar chart of Recall@1 under the lighting change before and after CLIPPER fusion for seven models" loading="lazy">
+      <figcaption>Recall@1 on 1,080 lighting-change queries (match within 1&nbsp;m and 30°; random 11.1%), before
+      and after CLIPPER fusion.</figcaption>
+    </figure>
+  </div>
+</div></section>
+
+<section id="pose"><div class="wrap">
+  <h2>From place to pose, and boulders as evidence</h2>
+  <div class="grid-3">
+    <div class="card"><div class="stat">17.8%</div><div class="stat-label">of LunarSim queries get a camera pose within
+      1&nbsp;m and 5° from the top-ranked map image, using its exact depth and LightGlue matches. When it works the pose
+      is good: about 0.2&nbsp;m and 0.4°.</div></div>
+    <div class="card"><div class="stat">47.3% vs. 2.4%</div><div class="stat-label">The same, under the map’s own Sun
+      and under the three hardest Sun conditions. Finding the place survives a Sun change far better than measuring the
+      pose does.</div></div>
+    <div class="card"><div class="stat">+0.2 to +2.3</div><div class="stat-label">points from LunarLoc’s own 3-D boulder
+      detections on repeated runs, against +4.0 to +10.1 from keypoints. Many views show fewer than three
+      boulders.</div></div>
   </div>
 </div></section>
 
@@ -317,24 +401,40 @@
     <li><strong>Adapt the backbone, then choose the pooling.</strong> Fine-tuning adds 11–19 points for every model.
     Fix λ, since training cannot set it; λ&nbsp;=&nbsp;0 is the cheapest.</li>
     <li><strong>Use local evidence to adjust the global ranking.</strong> Local evidence on the Moon is plentiful but unreliable. Fuse it with the
-    global score so that overturning a confident global decision needs strong local evidence; then the cheapest matcher
-    is good enough.</li>
+    global score so that overturning a confident global decision needs strong local evidence. This is the one finding
+    that held on real photographs and in a second simulator; CLIPPER is the strongest matcher we tried, nearest
+    neighbours the cheapest.</li>
     <li><strong>Level the image, and map each place from several directions.</strong> Rotate images to upright with the
     rover’s accelerometer before searching, record the map at the camera height used in operation, and include
     several headings per place. Position errors of a few metres cost little.</li>
   </ol>
-  <p class="callout" style="max-width:820px">These recommendations come from simulation. The first tests on real Apollo
-  photographs (above) show that the gains from lunar training largely disappear on real imagery, so closing the gap
-  between simulation and real photographs is the main open problem.</p>
+  <p class="callout" style="max-width:820px">These recommendations come from simulation. On real Apollo photographs and in
+  a second simulator the gains from lunar fine-tuning disappear, while fusion keeps helping. Closing the gap between
+  simulation and real photographs, and finding local evidence that survives a Sun change, are the main open
+  problems.</p>
 </div></section>
 
 <section id="related"><div class="wrap">
-  <h2>Related: DESPINA</h2>
-  <p style="max-width:820px"><a href="https://doi.org/10.5194/isprs-annals-XI-2-2026-881-2026">DESPINA</a>
-  (Nelson-Archer, Sarbajna and Eick, ISPRS Annals 2026) synthesises photorealistic lunar horizon views for a given
-  location from orbital elevation models with diffusion models. LunarSim gives exact control of the Sun; DESPINA
-  gives realistic appearance for real sites. We used it to render the map for the
-  <a href="#real">Apollo&nbsp;15 test</a> above.</p>
+  <h2>Related work: DESPINA and LunarLoc</h2>
+  <div class="grid-2" style="align-items:start">
+    <div>
+      <p><a href="https://doi.org/10.5194/isprs-annals-XI-2-2026-881-2026">DESPINA</a>
+      (Nelson-Archer, Sarbajna and Eick, ISPRS Annals 2026) synthesises photorealistic lunar horizon views for a given
+      location from orbital elevation models with diffusion models. LunarSim gives exact control of the Sun; DESPINA
+      gives realistic appearance for real sites. We used it to render the map for the
+      <a href="#real">Apollo&nbsp;15 test</a> above.</p>
+      <p><a href="https://arxiv.org/abs/2506.16940">LunarLoc</a> (Thomas et al., IEEE Aerospace 2026) localises a rover
+      against an earlier session by segmenting boulders with FastSAM, placing them in 3-D with stereo and matching them
+      with the CLIPPER consistency graph, with about 1&nbsp;cm error. Galatea solves a different part of the problem:
+      finding the place from one camera image among stored images. We used LunarLoc’s matcher, its released runs and its
+      boulder detections in the tests above.</p>
+    </div>
+    <figure class="figure-box">
+      <img src="/figures/despina_panel.webp" alt="Apollo 15 photographs next to DESPINA and shaded renders of the same stations" loading="lazy">
+      <figcaption>Apollo&nbsp;15 photographs (left) and map views of the same stations rendered by DESPINA (centre)
+      and as shaded elevation (right); map headings are not those of the photographs.</figcaption>
+    </figure>
+  </div>
 </div></section>
 
 <section id="cite"><div class="wrap">
